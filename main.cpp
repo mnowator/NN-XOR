@@ -8,28 +8,35 @@
 
 int main(int argc, char *argv[])
 {
+    // Generator licz pseudolosowych
     qsrand(QTime::currentTime().msec());
 
     QCoreApplication a(argc, argv);
-    QList<Neuron*> neurons;
+    QList<Neuron*> neurons; // Lista neuronow tworzacych siec
 
-    neurons.append(new Neuron());
-    neurons.append(new Neuron());
-
+    // Sztuczna warstwa tworzaca wejscia
     neurons.append(new Neuron());
     neurons.append(new Neuron());
 
+    // Pierwsza warstwa neuronow
+    neurons.append(new Neuron());
     neurons.append(new Neuron());
 
-    neurons[0]->setTeachingFactor(0.5);
-    neurons[1]->setTeachingFactor(0.5);
+    // Druga warstwa neuronow ( neuronu )
+    neurons.append(new Neuron());
+
+    // Ustawienie wsp. uczenia się dla kazdego neuronow
+    neurons[0]->setTeachingFactor(0.5); // Nie potrzebne - sztuczna warsta
+    neurons[1]->setTeachingFactor(0.5); // Nie potrzebne - sztuczna warsta
     neurons[2]->setTeachingFactor(0.5);
     neurons[3]->setTeachingFactor(0.5);
     neurons[4]->setTeachingFactor(0.5);
 
+    // Ustawienie stanow
     neurons[0]->setState(ACTIVATED);
     neurons[1]->setState(ACTIVATED);
 
+    // Ustanowienie polaczen pomiedzy neuronami
     neurons[2]->setBackwardConnection(neurons[0]);
     neurons[2]->setBackwardConnection(neurons[1]);
     neurons[3]->setBackwardConnection(neurons[0]);
@@ -40,8 +47,9 @@ int main(int argc, char *argv[])
     neurons[4]->setBackwardConnection(neurons[2]);
     neurons[4]->setBackwardConnection(neurons[3]);
 
-    QList<QList<double> > patterns;
+    QList<QList<double> > patterns; // Lista list wzorców
 
+    // Wzorce
     QList<double> pattern1 = { 0, 0, 0 };
     QList<double> pattern2 = { 0, 1, 1 };
     QList<double> pattern3 = { 1, 0, 1 };
@@ -52,13 +60,16 @@ int main(int argc, char *argv[])
     patterns.append(pattern3);
     patterns.append(pattern4);
 
-    for ( unsigned i=0; i<10000; ++i )
+    // Proces uczenia
+    for ( unsigned i=0; i<100000; ++i )
     {
-        unsigned idx = qrand() % 4;
+        unsigned idx = qrand() % 4; // Losowany numer wzorca
 
+        // Ustawienie wartosci z wzorcow na sztucznej warstwie stanwiacej wejscia do sieci
         neurons[0]->setActivateValue(patterns[idx][0]);
         neurons[1]->setActivateValue(patterns[idx][1]);
 
+        // Aktywacja kolejnych warstw sieci
         neurons[2]->activate();
         neurons[3]->activate();
         neurons[2]->setState(ACTIVATED);
@@ -67,7 +78,7 @@ int main(int argc, char *argv[])
         neurons[4]->activate();
         neurons[4]->setState(ACTIVATED);
 
-
+        // Obliczenie bledu zgodnie ze wsteczna propagacja bledu
         neurons[4]->computeError(patterns[idx][2]);
         neurons[2]->computeError();
         neurons[3]->computeError();
@@ -75,7 +86,7 @@ int main(int argc, char *argv[])
         neurons[3]->setState(ERROR_COMPUTED);
         neurons[2]->setState(ERROR_COMPUTED);
 
-
+        // Przeprowadzenie procesu uczenia
         neurons[4]->train();       
         neurons[2]->train();  
         neurons[3]->train();
@@ -85,6 +96,7 @@ int main(int argc, char *argv[])
         neurons[4]->setState(RELAXED);
     }
 
+    // Testowanie nauczonej sieci
     forever
     {
         double x1,x2;
