@@ -4,7 +4,7 @@
 #include <iostream>
 #include <QDebug>
 
-#include "neuron.h"
+#include "neuralnetwork.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,42 +12,13 @@ int main(int argc, char *argv[])
     qsrand(QTime::currentTime().msec());
 
     QCoreApplication a(argc, argv);
-    QList<Neuron*> neurons; // Lista neuronow tworzacych siec
 
-    // Sztuczna warstwa tworzaca wejscia
-    neurons.append(new Neuron());
-    neurons.append(new Neuron());
+    NeuralNetwork nn;
+    nn.setLayersDimensions(QList<double>({2,1}));
 
-    // Pierwsza warstwa neuronow
-    neurons.append(new Neuron());
-    neurons.append(new Neuron());
+    nn.setTeachningFactor(0.5);
 
-    // Druga warstwa neuronow ( neuronu )
-    neurons.append(new Neuron());
-
-    // Ustawienie wsp. uczenia się dla kazdego neuronow
-    neurons[0]->setTeachingFactor(0.5); // Nie potrzebne - sztuczna warsta
-    neurons[1]->setTeachingFactor(0.5); // Nie potrzebne - sztuczna warsta
-    neurons[2]->setTeachingFactor(0.5);
-    neurons[3]->setTeachingFactor(0.5);
-    neurons[4]->setTeachingFactor(0.5);
-
-    // Ustawienie stanow
-    neurons[0]->setState(ACTIVATED);
-    neurons[1]->setState(ACTIVATED);
-
-    // Ustanowienie polaczen pomiedzy neuronami
-    neurons[2]->setBackwardConnection(neurons[0]);
-    neurons[2]->setBackwardConnection(neurons[1]);
-    neurons[3]->setBackwardConnection(neurons[0]);
-    neurons[3]->setBackwardConnection(neurons[1]);
-
-    neurons[2]->setForwardConnection(neurons[4]);
-    neurons[3]->setForwardConnection(neurons[4]);
-    neurons[4]->setBackwardConnection(neurons[2]);
-    neurons[4]->setBackwardConnection(neurons[3]);
-
-    QList<QList<double> > patterns; // Lista list wzorców
+    QList<QList<double> > patterns;
 
     // Wzorce
     QList<double> pattern1 = { 0, 0, 0 };
@@ -87,8 +58,8 @@ int main(int argc, char *argv[])
         neurons[2]->setState(ERROR_COMPUTED);
 
         // Przeprowadzenie procesu uczenia
-        neurons[4]->train();       
-        neurons[2]->train();  
+        neurons[4]->train();
+        neurons[2]->train();
         neurons[3]->train();
 
         neurons[2]->setState(RELAXED);

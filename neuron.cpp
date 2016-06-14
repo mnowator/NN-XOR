@@ -23,9 +23,6 @@ void Neuron::activate()
     // aktywowanych wartosci przemnozonych przez wage polaczenia synaptycznego
     foreach ( Neuron* neuron, m_backwardConnections.keys() )
     {
-        if ( neuron->getState() == RELAXED )
-            neuron->activate();
-
         activatedValue += neuron->getActivateValue()*m_backwardConnections[neuron];
     }
 

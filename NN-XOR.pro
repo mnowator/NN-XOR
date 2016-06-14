@@ -8,8 +8,12 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    neuron.cpp
+    neuron.cpp \
+    neuronslayer.cpp \
+    neuralnetwork.cpp
 
 HEADERS += \
-    neuron.h
+    neuron.h \
+    neuronslayer.h \
+    neuralnetwork.h
 
