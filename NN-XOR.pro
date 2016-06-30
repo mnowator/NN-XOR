@@ -1,4 +1,4 @@
-QT += core
+QT += core xml
 QT -= gui
 
 TARGET = NN-XOR
@@ -15,5 +15,5 @@ SOURCES += main.cpp \
 HEADERS += \
     neuron.h \
     neuronslayer.h \
-    neuralnetwork.h
+    neuralnetwork.h \
 

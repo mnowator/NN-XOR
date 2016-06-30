@@ -1,14 +1,14 @@
 #ifndef NAURONSLAYER_H
 #define NAURONSLAYER_H
 
-#include <QList>
+#include <QVector>
 #include "neuron.h"
 
 
 class NeuronsLayer
 {
 private:
-    QList<Neuron*> m_neurons;
+    QVector<Neuron*> m_neurons;
 
 public:
     NeuronsLayer();
@@ -21,11 +21,14 @@ public:
     void setupForwardConnections( NeuronsLayer* layer );
     void setupBackwardConnections( NeuronsLayer* layer );
 
-    void setActivationValues(QList<double> activationValues);
-    QList<double> getActivationValues();
+    void setActivationValues(QVector<double> activationValues);
+    QVector<double> getActivationValues();
+    QVector<Neuron*> getNeurons();
+
+    unsigned length();
 
     void activate();
-    void computeError(QList<double> expectedValues = QList<double>() );
+    void computeError(QVector<double> expectedValues = QVector<double>() );
     void train();
     void relaxAllNeurons();
 

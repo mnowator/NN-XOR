@@ -1,102 +1,103 @@
 #include <QCoreApplication>
 #include <QtGlobal>
 #include <QTime>
+#include <QPair>
 #include <iostream>
 #include <QDebug>
+#include <random>
+#include <QFile>
+#include <vector>
 
 #include "neuralnetwork.h"
+#include "mnist_reader.hpp"
 
 int main(int argc, char *argv[])
 {
+    QCoreApplication a(argc, argv);
+
     // Generator licz pseudolosowych
     qsrand(QTime::currentTime().msec());
 
-    QCoreApplication a(argc, argv);
+    auto dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>();
+
+    QVector<QVector<double> > trainingImages;
+    QVector<QVector<double> > trainingOutputs;
+    QVector<unsigned> trainingLabels;
+
+    double startTeachningFactor = 0.5;
+    double finishTeachingFactor = 0.02;
+    unsigned numOfEpoach = 50;
 
     NeuralNetwork nn;
-    nn.setLayersDimensions(QList<double>({2,1}));
 
-    nn.setTeachningFactor(0.5);
 
-    QList<QList<double> > patterns;
+    for ( unsigned i=0; i<dataset.training_images.size(); ++i )
+    {
+        QVector<double> image;
 
-    // Wzorce
-    QList<double> pattern1 = { 0, 0, 0 };
-    QList<double> pattern2 = { 0, 1, 1 };
-    QList<double> pattern3 = { 1, 0, 1 };
-    QList<double> pattern4 = { 1, 1, 0 };
+        for ( unsigned j=0; j<dataset.training_images[i].size(); ++j )
+            image.append(dataset.training_images[i][j]/255.0f);
 
-    patterns.append(pattern1);
-    patterns.append(pattern2);
-    patterns.append(pattern3);
-    patterns.append(pattern4);
+        trainingImages.append(image);
+        trainingLabels.append(dataset.training_labels[i]);
+    }
+
+    for ( unsigned i=0; i<10; ++i )
+    {
+        QVector<double> output;
+
+        for ( unsigned j=0; j<10; ++j )
+            if ( i == j )
+                output.append(1.0f);
+            else
+                output.append(0.0f);
+
+        trainingOutputs.append(output);
+    }
+
+    nn.setLayersDimensions(QVector<unsigned>({300,10}));
+    nn.setInputLayerDimension(784);
 
     // Proces uczenia
-    for ( unsigned i=0; i<100000; ++i )
+    for ( unsigned i=0; i<numOfEpoach; ++i )
     {
-        unsigned idx = qrand() % 4; // Losowany numer wzorca
+        qDebug() << "Epoach = " << i+1;
+        double teachingFactor = startTeachningFactor - (((startTeachningFactor-finishTeachingFactor)/(float)numOfEpoach)*i);
+        double mean = 0;
+        unsigned idx = qrand() % 60000;
+        QVector<double> testedOutput;
 
-        // Ustawienie wartosci z wzorcow na sztucznej warstwie stanwiacej wejscia do sieci
-        neurons[0]->setActivateValue(patterns[idx][0]);
-        neurons[1]->setActivateValue(patterns[idx][1]);
+        nn.setTeachningFactor(teachingFactor);
 
-        // Aktywacja kolejnych warstw sieci
-        neurons[2]->activate();
-        neurons[3]->activate();
-        neurons[2]->setState(ACTIVATED);
-        neurons[3]->setState(ACTIVATED);
+        for ( unsigned j=0; j<trainingImages.length(); ++j)
+            nn.train(trainingImages[j], trainingOutputs[trainingLabels[j]]);
 
-        neurons[4]->activate();
-        neurons[4]->setState(ACTIVATED);
+        qDebug() << "Testing network with randomized image.";
+        qDebug() << "Label: " << trainingLabels[idx];
 
-        // Obliczenie bledu zgodnie ze wsteczna propagacja bledu
-        neurons[4]->computeError(patterns[idx][2]);
-        neurons[2]->computeError();
-        neurons[3]->computeError();
-        neurons[4]->setState(ERROR_COMPUTED);
-        neurons[3]->setState(ERROR_COMPUTED);
-        neurons[2]->setState(ERROR_COMPUTED);
+        testedOutput = nn.getResults(trainingImages[idx]);
 
-        // Przeprowadzenie procesu uczenia
-        neurons[4]->train();
-        neurons[2]->train();
-        neurons[3]->train();
-
-        neurons[2]->setState(RELAXED);
-        neurons[3]->setState(RELAXED);
-        neurons[4]->setState(RELAXED);
-    }
-
-    // Testowanie nauczonej sieci
-    forever
-    {
-        double x1,x2;
-
-        std::cout << "x1: ";
-        std::cin >> x1;
-
-        std::cout << "x2: ";
-        std::cin >> x2;
-
-        neurons[0]->setActivateValue(x1);
-        neurons[1]->setActivateValue(x2);
-        neurons[2]->activate();
-        neurons[3]->activate();
-        neurons[2]->setState(ACTIVATED);
-        neurons[3]->setState(ACTIVATED);
-
-        neurons[4]->activate();
-        neurons[4]->setState(ACTIVATED);
-
-        std::cout << "Output: " << neurons[4]->getActivateValue() << "\n";
-
-        neurons[2]->setState(RELAXED);
-        neurons[3]->setState(RELAXED);
-        neurons[4]->setState(RELAXED);
+        for ( unsigned j=0; j<testedOutput.length(); ++j)
+        {
+            qDebug() << j << " -- " << testedOutput[j] * 100.0 << "%";
+        }
     }
 
 
+    nn.saveNetwork("neuralnetwork.xml");
 
     return a.exec();
 }
+
+
+
+
+
+
+
+
+
+
+
+
 

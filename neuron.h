@@ -2,6 +2,7 @@
 #define NEURON_H
 
 #include <QHash>
+#include <QVector>
 
 enum STATE
 {
@@ -14,7 +15,7 @@ class Neuron
 {
 private:
     // Lista polaczen w "przod"
-    QList<Neuron* > m_forwardConnections;
+    QVector<Neuron* > m_forwardConnections;
     // Tablica asocjacyjna laczaca wskaznik do neuronu z waga
     QHash<Neuron*, double > m_backwardConnections;
 
@@ -41,6 +42,8 @@ public:
 
     // Funkcja modyfikujaca wagi polaczen synaptycznych oraz bias
     void train();
+
+    QVector<double> getWeights(QVector<Neuron*> layer);
 
     // Funkcja szytwno ustawiajaca wartosc aktywacji neuronu
     // Uzywana do sztucznego imitowania wektorow wejsciowych

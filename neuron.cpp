@@ -28,7 +28,7 @@ void Neuron::activate()
 
     activatedValue += m_bias; // Dodanie biasu
 
-    m_activatedValue = 1.0/(1.0+exp(-1*(activatedValue))); // Sigmoidalna funkcja aktywacji
+    m_activatedValue = 1.0/(1.0+exp(-1.0*(activatedValue))); // Sigmoidalna funkcja aktywacji
 }
 
 void Neuron::computeError(double expectedValue)
@@ -70,6 +70,16 @@ void Neuron::train()
 
     // Korekcja bias'u
     m_bias += m_teachingFactor*m_errorValue*(m_activatedValue*(1.0-m_activatedValue));
+}
+
+QVector<double> Neuron::getWeights(QVector<Neuron *> layer)
+{
+    QVector<double> weights;
+
+    foreach( Neuron* neuron, layer )
+        weights.append( m_backwardConnections[neuron] );
+
+    return weights;
 }
 
 void Neuron::setActivateValue(double value)

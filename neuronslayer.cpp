@@ -42,15 +42,15 @@ void NeuronsLayer::setupBackwardConnections(NeuronsLayer *layer)
             neuron->setBackwardConnection(layer->at(i));
 }
 
-void NeuronsLayer::setActivationValues(QList<double> activationValues)
+void NeuronsLayer::setActivationValues(QVector<double> activationValues)
 {
     for ( unsigned i=0; i<activationValues.length(); ++i )
         m_neurons[i]->setActivateValue(activationValues[i]);
 }
 
-QList<double> NeuronsLayer::getActivationValues()
+QVector<double> NeuronsLayer::getActivationValues()
 {
-    QList<double> output;
+    QVector<double> output;
 
     foreach( Neuron* neuron, m_neurons )
         output.append(neuron->getActivateValue());
@@ -58,28 +58,35 @@ QList<double> NeuronsLayer::getActivationValues()
     return output;
 }
 
+QVector<Neuron *> NeuronsLayer::getNeurons()
+{
+    return m_neurons;
+}
+
+unsigned NeuronsLayer::length()
+{
+    return m_neurons.length();
+}
+
 void NeuronsLayer::activate()
 {
     foreach ( Neuron* neuron, m_neurons)
     {
         neuron->activate();
-        neuron->setState(ACTIVATED);
     }
 }
 
-void NeuronsLayer::computeError(QList<double> expectedValues)
+void NeuronsLayer::computeError(QVector<double> expectedValues)
 {
     if ( expectedValues.length() == m_neurons.length() )
         for ( unsigned i=0; i<m_neurons.length(); ++i)
         {
             m_neurons.at(i)->computeError(expectedValues[i]);
-            m_neurons.at(i)->setState(ERROR_COMPUTED);
         }
     else
         foreach ( Neuron* neuron, m_neurons)
         {
             neuron->computeError();
-            neuron->setState(ERROR_COMPUTED);
         }
 }
 
